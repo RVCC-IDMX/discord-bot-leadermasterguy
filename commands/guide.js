@@ -1,12 +1,6 @@
 const {
-  ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder, EmbedBuilder,
+  ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder,
 } = require('discord.js');
-
-const embed = new EmbedBuilder()
-  .setColor(0x0099FF)
-  .setTitle('Guide')
-  .setURL('https://discord.js.org')
-  .setDescription('Guide with buttons');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -25,6 +19,6 @@ module.exports = {
           .setStyle(ButtonStyle.Link),
       );
 
-    await interaction.reply({ content: 'I think you should,', components: [row], embeds: [embed] });
+    await interaction.reply({ content: 'Click on the link below to open the guide!', components: [row] });
   },
 };

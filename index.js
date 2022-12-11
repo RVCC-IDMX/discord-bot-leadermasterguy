@@ -1,9 +1,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const {
-  Client, Collection, Events, GatewayIntentBits,
+  Client, Collection, Events, GatewayIntentBits, EmbedBuilder,
 } = require('discord.js');
-const wait = require('node:timers/promises').setTimeout;
 const { token } = require('./config.json');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -11,6 +10,10 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith('.js'));
+
+const embed = new EmbedBuilder()
+  .setTitle('Guide')
+  .setDescription('Type / to view all of the potential commands and their functions.');
 
 // eslint-disable-next-line no-restricted-syntax
 for (const file of commandFiles) {
@@ -25,6 +28,9 @@ client.once(Events.ClientReady, () => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
+  if (interaction.customId === 'primary') {
+    await interaction.reply({ embeds: [embed] });
+  }
   if (!interaction.isChatInputCommand()) return;
 
   const command = client.commands.get(interaction.commandName);
@@ -37,25 +43,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
     console.error(error);
     await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
   }
-});
-
-client.on(Events.InteractionCreate, (interaction) => {
-  if (!interaction.isButton()) return;
-  const filter = (i) => i.customId === 'primary' && i.user.id === '122157285790187530';
-
-  const collector = interaction.channel.createMessageComponentCollector({ filter, time: 15000 });
-
-  collector.on('collect', async (i) => {
-    await i.update({ content: 'A button was clicked!', components: [] });
-  });
-  collector.on('collect', async (i) => {
-    if (i.customId === 'primary') {
-      await i.deferUpdate();
-      await wait(4000);
-      await i.editReply({ content: 'A button was clicked!', components: [] });
-    }
-  });
-  collector.on('end', (collected) => console.log(`Collected ${collected.size} items`));
 });
 
 client.login(token);
