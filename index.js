@@ -3,6 +3,7 @@ const path = require('node:path');
 const {
   Client, Collection, Events, GatewayIntentBits,
 } = require('discord.js');
+const wait = require('node:timers/promises').setTimeout;
 const { token } = require('./config.json');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -36,6 +37,25 @@ client.on(Events.InteractionCreate, async (interaction) => {
     console.error(error);
     await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
   }
+});
+
+client.on(Events.InteractionCreate, (interaction) => {
+  if (!interaction.isButton()) return;
+  const filter = (i) => i.customId === 'primary' && i.user.id === '122157285790187530';
+
+  const collector = interaction.channel.createMessageComponentCollector({ filter, time: 15000 });
+
+  collector.on('collect', async (i) => {
+    await i.update({ content: 'A button was clicked!', components: [] });
+  });
+  collector.on('collect', async (i) => {
+    if (i.customId === 'primary') {
+      await i.deferUpdate();
+      await wait(4000);
+      await i.editReply({ content: 'A button was clicked!', components: [] });
+    }
+  });
+  collector.on('end', (collected) => console.log(`Collected ${collected.size} items`));
 });
 
 client.login(token);
