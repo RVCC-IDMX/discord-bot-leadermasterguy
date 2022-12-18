@@ -5,7 +5,7 @@ function getCows(error, cowNames) {
   if (error) {
     console.log(error);
   } else if (cowNames) {
-    console.log(`Number of cows available: ${cowNames.length}`);
+    // console.log(`Number of cows available: ${cowNames.length}`);
   }
 }
 
@@ -23,17 +23,19 @@ module.exports = {
       .setRequired(false)),
   async execute(interaction) {
     const cowMessage = interaction.options.getString('message');
-    const cowType = interaction.options.getString('type');
+    let cowType = interaction.options.getString('type');
     const cowList = await cowsay.list(getCows);
     // console.log(cowType);
     // console.log(`${cowType}.cow`);
     // console.log(cowList);
+    if (cowType === null) {
+      cowType = 'fat-cow';
+    }
     if (cowList.includes(`${cowType}.cow`)) {
       const cow = cowsay.say({
         text: cowMessage,
         f: cowType,
       }).replaceAll('`', "'");
-      console.log(cowsay.list(getCows));
       // ensures total character length <2000 (reply formatting adds 6 characters)
       if (cow.length < 1994) {
         await interaction.reply(`\`\`\`${cow}\`\`\``);
